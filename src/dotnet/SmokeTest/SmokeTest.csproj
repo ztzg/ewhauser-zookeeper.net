@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>SmokeTest</AssemblyName>
+    <!-- <TargetFramework>netstandard2.0</TargetFramework> -->
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <StartupObject></StartupObject>
+    <ApplicationIcon />
+    <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="RdkafkaSaslSspiWrapperClient.cs" />
+    <Compile Include="S22SaslClient.cs" />
+    <Compile Include="SaslWrapperClient.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\dotnet-rdkafka-sasl-sspi-wrapper\RdkafkaSaslSspiWrapper\RdkafkaSaslSspiWrapper.csproj" />
+    <ProjectReference Include="..\..\..\..\dotnet-sasl-wrapper\SASLWrapper\SASLWrapper.csproj" />
+    <ProjectReference Include="..\..\..\..\S22.Sasl\S22.Sasl.csproj" />
+    <ProjectReference Include="..\ZooKeeperNet\ZooKeeperNet.csproj">
+      <Project>{5C6774FB-2350-46B2-B1DF-1CCC757C7727}</Project>
+      <Name>ZooKeeperNet</Name>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IsWindows)'=='true'">
+    <Content Include="..\..\..\..\librdkafka\win32\outdir\v142\x64\Debug\rdkafka_sasl_sspi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

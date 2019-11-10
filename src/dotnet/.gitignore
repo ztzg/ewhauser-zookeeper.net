@@ -18,3 +18,5 @@ ZooKeeper.Profiled/obj
 ZooKeeper.Profiled/bin
 *.vsp
 *.7z
+SmokeTest/bin
+SmokeTest/obj
