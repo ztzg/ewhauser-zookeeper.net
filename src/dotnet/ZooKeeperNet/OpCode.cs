@@ -33,6 +33,7 @@
         GetChildren2 = 12,
         Auth = 100,
         SetWatches = 101,
+        SASL = 102,
         CreateSession = -10,
         CloseSession = -11,
         Error = -1,    

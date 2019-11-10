@@ -441,6 +441,79 @@ namespace ZooKeeperNet
         {
             LOG.InfoFormat("Socket connection established to {0}, initiating session", client.Client.RemoteEndPoint);
             ConnectRequest conReq = new ConnectRequest(0, lastZxid, Convert.ToInt32(conn.SessionTimeout.TotalMilliseconds), conn.SessionId, conn.SessionPassword);
+            Packet conPacket = new Packet(null, null, conReq, null, null, null, null, null);
+
+            if (conn.saslClient != null)
+            {
+                lock (outgoingQueue)
+                {
+                    // SASL negociation is synchronous, and must complete before we send the (non-SASL) auth data and
+                    // watches.  We explicitly drive the send/receive as the queue processing loop is not active yet.
+
+                    // First, push the ConnectRequest down the pipe.
+                    DoSend(conPacket);
+                    conPacket = null;
+
+                    byte[] token = conn.saslClient.Start((IPEndPoint)client.Client.LocalEndPoint,
+                        (IPEndPoint)client.Client.RemoteEndPoint);
+
+                    try
+                    {
+                        bool lastPacket = false;
+                        
+                        while (true)
+                        {
+                            RequestHeader h = new RequestHeader();
+                            ReplyHeader r = new ReplyHeader();
+                            h.Type = (int)OpCode.SASL;
+                            GetSASLRequest request = new GetSASLRequest(token != null ? token : new byte[0]);
+                            SetSASLResponse response = new SetSASLResponse();
+
+                            Packet p = new Packet(h, r, request, response, null, null, null, null);
+
+                            // Push the packet.
+                            DoSend(p);
+
+                            // Synchronously wait for the response.
+                            if (!p.WaitUntilFinishedSlim(conn.ConnectionTimeout))
+                            {
+                                throw new TimeoutException(new StringBuilder("The request ").Append(request).Append(" timed out while waiting for a response from the server.").ToString());
+                            }
+
+                            if (r.Err != 0)
+                            {
+                                throw KeeperException.Create((KeeperException.Code)Enum.ToObject(typeof(KeeperException.Code), r.Err));
+                            }
+
+                            if (lastPacket)
+                            {
+                                break;
+                            }
+
+                            // SASL round.
+                            token = conn.saslClient.EvaluateChallenge(response.Token);
+
+                            if (conn.saslClient.IsCompleted)
+                            {
+                                if (conn.saslClient.HasLastPacket)
+                                {
+                                    lastPacket = true;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        conn.saslClient.Finish();
+                    }
+                }
+            }
+
+            bool hasOutgoingRequests;
 
             lock (outgoingQueue)
             {
@@ -459,10 +532,19 @@ namespace ZooKeeperNet
                     addPacketFirst(
                         new Packet(new RequestHeader(-4, (int) OpCode.Auth), null, new AuthPacket(0, id.Scheme, id.GetData()), null, null, null, null, null));
 
-                addPacketFirst(new Packet(null, null, conReq, null, null, null, null, null));
-                
+                // The ConnectRequest packet has already been sent in the SASL case.
+                if (conPacket != null)
+                {
+                    addPacketFirst(conPacket);
+                    conPacket = null;
+                }
+
+                hasOutgoingRequests = !outgoingQueue.IsEmpty();
             }
-            packetAre.Set();
+
+            if (hasOutgoingRequests)
+                packetAre.Set();
+
             if (LOG.IsDebugEnabled)
                 LOG.DebugFormat("Session establishment request sent on {0}",client.Client.RemoteEndPoint);
         }

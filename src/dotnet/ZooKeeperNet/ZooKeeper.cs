@@ -266,21 +266,35 @@
         ///            a watcher object which will be notified of state changes, may
         ///            also be notified for node events
         /// </param>
-        public ZooKeeper(string connectstring, TimeSpan sessionTimeout, IWatcher watcher)
+        public ZooKeeper(string connectstring, TimeSpan sessionTimeout, IWatcher watcher) :
+            this(connectstring, sessionTimeout, watcher, null)
+        {
+        }
+
+        /// <param name="saslClient">
+        /// An optional object implementing the <see cref="ISaslClient"/> interface which will be used by the
+        /// <see cref="ClientConnection"/> to authenticate with the server immediately after (re)connect.
+        /// </param>
+        public ZooKeeper(string connectstring, TimeSpan sessionTimeout, IWatcher watcher, ISaslClient saslClient)
         {
             LOG.InfoFormat("Initiating client connection, connectstring={0} sessionTimeout={1} watcher={2}", connectstring, sessionTimeout, watcher);
 
             watchManager.DefaultWatcher = watcher;
-            cnxn = new ClientConnection(connectstring, sessionTimeout, this, watchManager);
+            cnxn = new ClientConnection(connectstring, sessionTimeout, this, watchManager, saslClient);
             cnxn.Start();
         }
 
-        public ZooKeeper(string connectstring, TimeSpan sessionTimeout, IWatcher watcher, long sessionId, byte[] sessionPasswd)
+        public ZooKeeper(string connectstring, TimeSpan sessionTimeout, IWatcher watcher, long sessionId, byte[] sessionPasswd) :
+            this(connectstring, sessionTimeout, watcher, null, sessionId, sessionPasswd)
+        {
+        }
+        
+        public ZooKeeper(string connectstring, TimeSpan sessionTimeout, IWatcher watcher, ISaslClient saslClient, long sessionId, byte[] sessionPasswd)
         {
             LOG.InfoFormat("Initiating client connection, connectstring={0} sessionTimeout={1} watcher={2} sessionId={3} sessionPasswd={4}", connectstring, sessionTimeout, watcher, sessionId, (sessionPasswd == null ? "<null>" : "<hidden>"));
 
             watchManager.DefaultWatcher = watcher;
-            cnxn = new ClientConnection(connectstring, sessionTimeout, this, watchManager, sessionId, sessionPasswd);
+            cnxn = new ClientConnection(connectstring, sessionTimeout, this, watchManager, saslClient, sessionId, sessionPasswd);
             cnxn.Start();
         }
 

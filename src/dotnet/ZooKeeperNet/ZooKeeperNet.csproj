@@ -145,6 +145,7 @@
     <Compile Include="IO\EndianBitConverter.cs" />
     <Compile Include="IO\Endianness.cs" />
     <Compile Include="IO\LittleEndianBitConverter.cs" />
+    <Compile Include="ISaslClient.cs" />
     <Compile Include="IStartable.cs" />
     <Compile Include="IZooKeeper.cs" />
     <Compile Include="Jute\BinaryInputArchive.cs" />

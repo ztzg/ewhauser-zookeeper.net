@@ -107,6 +107,7 @@ namespace ZooKeeperNet
         internal string hosts;
         internal readonly ZooKeeper zooKeeper;
         internal readonly ZKWatchManager watcher;
+        internal readonly ISaslClient saslClient;
         internal readonly List<IPEndPoint> serverAddrs = new List<IPEndPoint>();
         internal readonly List<AuthData> authInfo = new List<AuthData>();
         internal TimeSpan readTimeout;
@@ -122,7 +123,7 @@ namespace ZooKeeperNet
 
         internal ClientConnectionRequestProducer producer;
         internal ClientConnectionEventConsumer consumer;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ClientConnection"/> class.
         /// </summary>
@@ -130,8 +131,9 @@ namespace ZooKeeperNet
         /// <param name="sessionTimeout">The session timeout.</param>
         /// <param name="zooKeeper">The zoo keeper.</param>
         /// <param name="watcher">The watch manager.</param>
-        public ClientConnection(string connectionString, TimeSpan sessionTimeout, ZooKeeper zooKeeper, ZKWatchManager watcher):
-            this(connectionString, sessionTimeout, zooKeeper, watcher, 0, new byte[16], DefaultConnectTimeout)
+        /// <param name="saslClient">The SASL client.</param>
+        public ClientConnection(string connectionString, TimeSpan sessionTimeout, ZooKeeper zooKeeper, ZKWatchManager watcher, ISaslClient saslClient) :
+            this(connectionString, sessionTimeout, zooKeeper, watcher, saslClient, 0, new byte[16], DefaultConnectTimeout)
         {
         }
 
@@ -171,14 +173,47 @@ namespace ZooKeeperNet
         /// <param name="sessionTimeout">The session timeout.</param>
         /// <param name="zooKeeper">The zoo keeper.</param>
         /// <param name="watcher">The watch manager.</param>
+        /// <param name="saslClient">The SASL client.</param>
+        /// <param name="sessionId">The session id.</param>
+        /// <param name="sessionPasswd">The session passwd.</param>
+        public ClientConnection(string hosts, TimeSpan sessionTimeout, ZooKeeper zooKeeper, ZKWatchManager watcher, ISaslClient saslClient, long sessionId, byte[] sessionPasswd)
+            : this(hosts, sessionTimeout, zooKeeper, watcher, saslClient, 0, new byte[16], DefaultConnectTimeout)
+        {
+        }
+
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ClientConnection"/> class.
+        /// </summary>
+        /// <param name="hosts">The hosts.</param>
+        /// <param name="sessionTimeout">The session timeout.</param>
+        /// <param name="zooKeeper">The zoo keeper.</param>
+        /// <param name="watcher">The watch manager.</param>
         /// <param name="sessionId">The session id.</param>
         /// <param name="sessionPasswd">The session passwd.</param>
         /// <param name="connectTimeout">Connection Timeout.</param>
-        public ClientConnection(string hosts, TimeSpan sessionTimeout, ZooKeeper zooKeeper, ZKWatchManager watcher, long sessionId, byte[] sessionPasswd, TimeSpan connectTimeout)
+        public ClientConnection(string hosts, TimeSpan sessionTimeout, ZooKeeper zooKeeper, ZKWatchManager watcher, long sessionId, byte[] sessionPasswd, TimeSpan connectTimeout) :
+            this(hosts, sessionTimeout, zooKeeper, watcher, null, sessionId, sessionPasswd, connectTimeout)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ClientConnection"/> class.
+        /// </summary>
+        /// <param name="hosts">The hosts.</param>
+        /// <param name="sessionTimeout">The session timeout.</param>
+        /// <param name="zooKeeper">The zoo keeper.</param>
+        /// <param name="watcher">The watch manager.</param>
+        /// <param name="saslClient">The SASL client.</param>
+        /// <param name="sessionId">The session id.</param>
+        /// <param name="sessionPasswd">The session passwd.</param>
+        /// <param name="connectTimeout">Connection Timeout.</param>
+        public ClientConnection(string hosts, TimeSpan sessionTimeout, ZooKeeper zooKeeper, ZKWatchManager watcher, ISaslClient saslClient, long sessionId, byte[] sessionPasswd, TimeSpan connectTimeout)
         {
             this.hosts = hosts;
             this.zooKeeper = zooKeeper;
             this.watcher = watcher;
+            this.saslClient = saslClient;
             SessionTimeout = sessionTimeout;
             SessionId = sessionId;
             SessionPassword = sessionPasswd;
