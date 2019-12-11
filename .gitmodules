@@ -1,0 +1,4 @@
+[submodule "src/dotnet/S22.Sasl"]
+	path = src/dotnet/S22.Sasl
+	url = https://github.com/ztzg/S22.Sasl.git
+	branch = RT-46545-zookeeper-net-sasl
