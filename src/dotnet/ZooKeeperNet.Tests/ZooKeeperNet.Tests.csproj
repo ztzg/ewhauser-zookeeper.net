@@ -80,6 +80,7 @@
     <Compile Include="ACLRootTests.cs" />
     <Compile Include="AssemblyFixture.cs" />
     <Compile Include="RecoveryTest.cs" />
+    <Compile Include="SaslTests.cs" />
     <Compile Include="SocketTests.cs" />
     <Compile Include="ChrootTests.cs" />
     <Compile Include="ClientTests.cs" />
@@ -112,6 +113,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\S22.Sasl\S22.Sasl.csproj">
+      <Project>{b860646a-13a2-47d9-9790-4719a91bf35b}</Project>
+      <Name>S22.Sasl</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ZooKeeperNet\ZooKeeperNet.csproj">
       <Project>{5C6774FB-2350-46B2-B1DF-1CCC757C7727}</Project>
       <Name>ZooKeeperNet</Name>
