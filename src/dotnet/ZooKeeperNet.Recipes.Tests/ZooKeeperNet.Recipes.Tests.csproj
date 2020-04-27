@@ -11,26 +11,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ZooKeeperNet\ZooKeeperNet.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="log4net.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="S22.Sasl">
-      <HintPath>..\lib\S22.Sasl.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\ZooKeeperNet.Tests\ZooKeeperNet.Tests.csproj" />
+    <ProjectReference Include="..\ZooKeeperNet.Recipes\ZooKeeperNet.Recipes.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="nunit" Version="3.11.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.11.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="3.0.0" />
   </ItemGroup>
 
 </Project>
